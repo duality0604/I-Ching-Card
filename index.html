@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I Ching Card</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #131b2e;
+            --card-inner: #1a233a;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --border: #1e293b;
+            --gold: #f59e0b;
+        }
+        @font-face {
+            font-family: 'IChingFont';
+            src: url('I-Ching.ttf') format('truetype');
+        }
+        html, body {
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 1.5rem;
+            color: var(--accent);
+            margin: 0 0 4px 0;
+            text-align: center;
+            letter-spacing: 0.05em;
+        }
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin: 0 0 16px 0;
+            text-align: center;
+        }
+        .oracle-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 340px;
+            width: 100%;
+        }
+        .card {
+            background: linear-gradient(145deg, var(--card-bg), var(--card-inner));
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 16px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin-bottom: 16px;
+        }
+        .card.shaking {
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            20% { transform: translate(-5px, 5px) rotate(-2deg); }
+            40% { transform: translate(5px, -5px) rotate(2deg); }
+            60% { transform: translate(-3px, 3px) rotate(-1deg); }
+            80% { transform: translate(3px, -3px) rotate(1deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        .card-header {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--gold);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .symbol-display {
+            font-family: 'IChingFont', sans-serif;
+            font-size: 4.5rem;
+            line-height: 1;
+            margin: 10px 0;
+            color: var(--text-main);
+            text-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
+        }
+        .meaning-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--text-main);
+            margin-top: 8px;
+        }
+        .draw-btn {
+            background: linear-gradient(135deg, #38bdf8, #0284c7);
+            color: #0b0f19;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+            transition: all 0.2s ease;
+            width: 100%;
+            letter-spacing: 0.03em;
+        }
+        .draw-btn:hover {
+            opacity: 0.95;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(56, 189, 248, 0.4);
+        }
+        .draw-btn:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>I Ching Card</h1>
+
+    <div class="oracle-container">
+        <div class="card" id="cardElement">
+            <div class="card-header" id="cardHeader"></div>
+            <div class="symbol-display" id="symbolDisplay"></div>
+            <div class="meaning-title" id="meaningTitle"></div>
+        </div>
+
+        <button class="draw-btn" onclick="drawCard()">Next</button>
+    </div>
+
+    <script>
+        const hexagrams = [
+            {n: 1, sym: "䷀", title: "The Creative, Heaven"},
+            {n: 2, sym: "䷁", title: "The Receptive, Earth"},
+            {n: 3, sym: "䷂", title: "Initial Difficulty"},
+            {n: 4, sym: "䷃", title: "Youthful Folly"},
+            {n: 5, sym: "䷄", title: "Waiting, Patience"},
+            {n: 6, sym: "䷅", title: "Conflict, Dispute"},
+            {n: 7, sym: "䷆", title: "The Army"},
+            {n: 8, sym: "䷇", title: "Union, Alliance"},
+            {n: 9, sym: "䷈", title: "Small Taming"},
+            {n: 10, sym: "䷉", title: "Treading, Conduct"},
+            {n: 11, sym: "䷊", title: "Peace, Flow"},
+            {n: 12, sym: "䷋", title: "Standstill"},
+            {n: 13, sym: "䷌", title: "Fellowship"},
+            {n: 14, sym: "䷍", title: "Great Possession"},
+            {n: 15, sym: "䷎", title: "Modesty, Balance"},
+            {n: 16, sym: "䷏", title: "Enthusiasm, Joy"},
+            {n: 17, sym: "䷐", title: "Following"},
+            {n: 18, sym: "䷑", title: "Work on Decayed"},
+            {n: 19, sym: "䷒", title: "Approach"},
+            {n: 20, sym: "䷓", title: "Contemplation"},
+            {n: 21, sym: "䷔", title: "Biting Through"},
+            {n: 22, sym: "䷕", title: "Grace, Adornment"},
+            {n: 23, sym: "䷖", title: "Splitting Apart"},
+            {n: 24, sym: "䷗", title: "Return, Turning Point"},
+            {n: 25, sym: "䷘", title: "Innocence"},
+            {n: 26, sym: "䷙", title: "Great Taming"},
+            {n: 27, sym: "䷚", title: "Nourishment"},
+            {n: 28, sym: "䷛", title: "Great Preponderance"},
+            {n: 29, sym: "䷜", title: "The Abysmal, Water"},
+            {n: 30, sym: "䷝", title: "The Clinging, Fire"},
+            {n: 31, sym: "䷞", title: "Influence"},
+            {n: 32, sym: "䷟", title: "Duration"},
+            {n: 33, sym: "䷠", title: "Retreat"},
+            {n: 34, sym: "䷡", title: "Great Power"},
+            {n: 35, sym: "䷢", title: "Progress, Advance"},
+            {n: 36, sym: "䷣", title: "Darkening of Light"},
+            {n: 37, sym: "䷤", title: "The Family"},
+            {n: 38, sym: "䷥", title: "Opposition"},
+            {n: 39, sym: "䷦", title: "Obstruction"},
+            {n: 40, sym: "䷧", title: "Deliverance, Relief"},
+            {n: 41, sym: "䷨", title: "Decrease"},
+            {n: 42, sym: "䷩", title: "Increase, Expansion"},
+            {n: 43, sym: "䷪", title: "Breakthrough"},
+            {n: 44, sym: "䷫", title: "Coming to Meet"},
+            {n: 45, sym: "䷬", title: "Gathering Together"},
+            {n: 46, sym: "䷭", title: "Pushing Upward"},
+            {n: 47, sym: "䷮", title: "Oppression"},
+            {n: 48, sym: "䷯", title: "The Well, Source"},
+            {n: 49, sym: "䷰", title: "Revolution"},
+            {n: 50, sym: "䷱", title: "The Cauldron"},
+            {n: 51, sym: "䷲", title: "The Arousing"},
+            {n: 52, sym: "䷳", title: "Keeping Still"},
+            {n: 53, sym: "䷴", title: "Development"},
+            {n: 54, sym: "䷵", title: "Marrying Maiden"},
+            {n: 55, sym: "䷶", title: "Abundance"},
+            {n: 56, sym: "䷷", title: "The Wanderer"},
+            {n: 57, sym: "䷸", title: "The Gentle, Wind"},
+            {n: 58, sym: "䷹", title: "The Joyous, Lake"},
+            {n: 59, sym: "䷺", title: "Dispersion"},
+            {n: 60, sym: "䷻", title: "Limitation"},
+            {n: 61, sym: "䷼", title: "Inner Truth"},
+            {n: 62, sym: "䷽", title: "Small Preponderance"},
+            {n: 63, sym: "䷾", title: "After Completion"},
+            {n: 64, sym: "䷿", title: "Before Completion"}
+        ];
+
+        function drawCard() {
+            const card = document.getElementById('cardElement');
+            card.classList.add('shaking');
+
+            setTimeout(() => {
+                card.classList.remove('shaking');
+                const randomHex = hexagrams[Math.floor(Math.random() * hexagrams.length)];
+                
+                document.getElementById('cardHeader').textContent = `Hexagram ${randomHex.n}`;
+                document.getElementById('symbolDisplay').textContent = randomHex.sym;
+                document.getElementById('meaningTitle').textContent = randomHex.title;
+            }, 400);
+        }
+    </script>
+</body>
+</html>
